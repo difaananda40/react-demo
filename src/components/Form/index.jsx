@@ -76,10 +76,14 @@ class FormContainer extends React.Component {
         accessors: newAccessors,
       })
     }
-    if((selectedData && prevProps.selectedData !== selectedData)) {
+
+    if(selectedData && prevProps.selectedData !== selectedData && mode !== 'create') {
       setForm();
     }
-    if(mode !== prevProps.mode && mode === 'create') this.resetState();
+
+    if(mode !== prevProps.mode && mode === 'create') {
+      this.resetState();
+    }
   }
 
   resetState = () => {

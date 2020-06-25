@@ -17,14 +17,15 @@ class App extends React.Component {
       data: [...components],
       showForm: false,
       selectedData: null,
-      mode: 'create' // Mode available: create, edit, view
+      mode: null // Mode available: create, edit, view
     }
   }
 
   handleForm = (event) => {
     const { name } = event.target;
     this.setState({
-      mode: name || 'create'
+      mode: name || null,
+      selectedData: null,
     }, () => {
       this.setState(prevState => ({
         showForm: !prevState.showForm
@@ -65,9 +66,12 @@ class App extends React.Component {
 
   deleteData = () => {
     const { data, selectedData } = this.state;
-    this.setState({
-      data: [...data.filter(dt => dt.key !== selectedData.key)]
-    })
+    if(window.confirm('Are you sure to delete this data?')) {
+      this.setState({
+        data: [...data.filter(dt => dt.key !== selectedData.key)],
+        selectedData: null
+      })
+    }
   }
 
   render() {
@@ -86,7 +90,7 @@ class App extends React.Component {
                 <Button
                   variant="info"
                   size="sm"
-                  mode="create"
+                  name="create"
                   onClick={this.handleForm}
                 >
                   Create
@@ -127,6 +131,7 @@ class App extends React.Component {
                 <Table
                   data={data}
                   selectData={this.selectData}
+                  selectedData={selectedData}
                 />
               </Col>
             </Row>
