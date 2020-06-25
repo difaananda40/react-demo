@@ -24,20 +24,33 @@ class Table extends React.Component {
       {
         dataField: 'accessedby',
         text: 'Permission',
-        formatter: (cell) => cell.map(permit => permit.permission).join(', ')
+        formatter: (cell) => {
+          let data = [];
+          cell.forEach((permit, index) => {
+            const functions = permit.function.map(fn => fn).join(', ');
+            data.push(
+              <div key={index}>
+                <p className="font-weight-bold m-0">{permit.permission}</p>
+                <p className="text-muted mb-1">{functions}</p>
+              </div>
+            )
+          })
+          return data;
+        }
       }
     ];
-    this.selectRow = {
-      mode: 'radio',
-      clickToSelect: true,
-      onSelect: (row, isSelect, rowIndex, e) => {
-        this.props.selectData(row)
-      }
-    };
   }
   
   render() {
-    const { data } = this.props;
+    const { data, selectedData, selectData } = this.props;
+    const selectRow = {
+      mode: 'radio',
+      clickToSelect: true,
+      hideSelectColumn: !selectedData,
+      onSelect: (row, isSelect, rowIndex, e) => {
+        selectData(row)
+      }
+    };
     return (
       <BootstrapTable
         bootstrap4
@@ -45,14 +58,11 @@ class Table extends React.Component {
         data={ data } 
         columns={ this.columns }
         striped
-        className="table-flush"
+        hover
         bordered={ false }
         wrapperClasses="table-responsive"
         rowEvents={this.rowEvents}
-        rowStyle={{ 
-          cursor: 'pointer'
-        }}
-        selectRow={this.selectRow}       
+        selectRow={selectRow}       
       />
     );
   }
