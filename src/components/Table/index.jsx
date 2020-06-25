@@ -1,5 +1,6 @@
 import React from 'react';
 import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
 
 class Table extends React.Component {
   constructor(props) {
@@ -62,7 +63,10 @@ class Table extends React.Component {
         bordered={ false }
         wrapperClasses="table-responsive"
         rowEvents={this.rowEvents}
-        selectRow={selectRow}       
+        selectRow={selectRow} 
+        pagination={ paginationFactory({
+          showTotal: true,
+        }) }      
       />
     );
   }
