@@ -2,6 +2,10 @@
   table-layout: auto;
 }
 
+.react-bootstrap-table table tr {
+  cursor: pointer;
+}
+
 .react-bootstrap-table-page-btns-ul {
   float: right;
 }
