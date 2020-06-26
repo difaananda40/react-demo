@@ -230,7 +230,7 @@ class FormContainer extends React.Component {
   } 
 
   render() {
-    const { show, handleForm, mode } = this.props;
+    const { show, handleForm, mode, deleteData } = this.props;
     const { accessors, permissions, info, isFormValidate } = this.state;
     return (
       <Modal
@@ -245,15 +245,30 @@ class FormContainer extends React.Component {
           <Modal.Header style={{ backgroundColor: '#8C00FF' }}>
             <Modal.Title className="text-capitalize">{mode} Components</Modal.Title>
             <div>
-              <Button
-                type="submit"
-                variant="info"
-                className="border border-white"
-                size="sm"
-                disabled={mode === 'view'}
-              >
-                Save
-              </Button>
+              {
+                mode === 'delete'
+                ? (
+                  <Button
+                    variant="info"
+                    className="border border-white"
+                    size="sm"
+                    onClick={deleteData}
+                    type="button"
+                  >
+                  Delete
+                </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="info"
+                    className="border border-white"
+                    size="sm"
+                    disabled={mode === 'view'}
+                  >
+                    Save
+                  </Button>
+                )
+              }
               <Button
                 variant="success"
                 size="sm"
@@ -282,7 +297,7 @@ class FormContainer extends React.Component {
                           value={info.component_id}
                           onChange={this.handleChangeInfo}
                           required
-                          disabled={mode === 'edit' || mode === 'view'}
+                          disabled={mode === 'edit' || mode === 'view' || mode === 'delete'}
                         />
                         <Form.Control.Feedback type="invalid">
                           Please enter component id!
@@ -302,7 +317,7 @@ class FormContainer extends React.Component {
                           value={info.component_name}
                           onChange={this.handleChangeInfo}
                           required
-                          disabled={mode === 'view'}
+                          disabled={mode === 'view' || mode === 'delete'}
                         />
                         <Form.Control.Feedback type="invalid">
                           Please enter component name!
@@ -324,7 +339,7 @@ class FormContainer extends React.Component {
                           value={info.module}
                           onChange={this.handleChangeInfo}
                           required
-                          disabled={mode === 'view'}
+                          disabled={mode === 'view' || mode === 'delete'}
                         >
                           <option value="">Choose...</option>
                           {this.modules.map(md => (<option key={md.key} value={md.key}>{md.label}</option>))}
@@ -346,7 +361,7 @@ class FormContainer extends React.Component {
                           name="icon"
                           value={info.icon}
                           onChange={this.handleChangeInfo}
-                          disabled={mode === 'view'}
+                          disabled={mode === 'view' || mode === 'delete'}
                         />
                       </Col>
                     </Form.Group>
@@ -365,7 +380,7 @@ class FormContainer extends React.Component {
                           value={info.url}
                           onChange={this.handleChangeInfo}
                           required
-                          disabled={mode === 'view'}
+                          disabled={mode === 'view' || mode === 'delete'}
                         />
                         <Form.Control.Feedback type="invalid">
                           Please enter url!
@@ -385,7 +400,7 @@ class FormContainer extends React.Component {
                           value={info.status}
                           onChange={this.handleChangeInfo}
                           required
-                          disabled={mode === 'view'}
+                          disabled={mode === 'view' || mode === 'delete'}
                         >
                           <option value="">Choose...</option>
                           {this.moduleStatus.map(ms => (<option key={ms.MODULES_STATUS} value={ms.MODULES_STATUS}>{ms.MODULES_STATUS}</option>))}
@@ -411,7 +426,7 @@ class FormContainer extends React.Component {
                                 value={permit.accessor}
                                 onChange={event => this.handleChangeAccessor(event, index)}
                                 required
-                                disabled={mode === 'view'}
+                                disabled={mode === 'view' || mode === 'delete'}
                               >
                                 <option value=''>Choose...</option>
                                 {accessors.map(acc => (
@@ -430,7 +445,7 @@ class FormContainer extends React.Component {
                                 id={`check-create-${index}`}
                                 name="create"
                                 checked={permit.function.create}
-                                disabled={!permit.accessor || mode === 'view'}
+                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
                                 onChange={event => this.handleChangeFunction(event, index)}
                               />
                               <Form.Check
@@ -438,7 +453,7 @@ class FormContainer extends React.Component {
                                 id={`check-view-${index}`}
                                 name="view"
                                 checked={permit.function.view}
-                                disabled={!permit.accessor || mode === 'view'}
+                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
                                 onChange={event => this.handleChangeFunction(event, index)}
                               />
                               <Form.Check
@@ -446,7 +461,7 @@ class FormContainer extends React.Component {
                                 id={`check-edit-${index}`}
                                 name="edit"
                                 checked={permit.function.edit}
-                                disabled={!permit.accessor || mode === 'view'}
+                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
                                 onChange={event => this.handleChangeFunction(event, index)}
                               />
                               <Form.Check
@@ -454,7 +469,7 @@ class FormContainer extends React.Component {
                                 id={`check-delete-${index}`}
                                 name="delete"
                                 checked={permit.function.delete}
-                                disabled={!permit.accessor || mode === 'view'}
+                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
                                 onChange={event => this.handleChangeFunction(event, index)}
                               />
                               <Form.Check
@@ -462,13 +477,13 @@ class FormContainer extends React.Component {
                                 id={`check-restore-${index}`}
                                 name="restore"
                                 checked={permit.function.restore}
-                                disabled={!permit.accessor || mode === 'view'}
+                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
                                 onChange={event => this.handleChangeFunction(event, index)}
                               />
                             </Col>
                           </Row>
                         </Col>
-                        {mode !== 'view' && (
+                        {mode !== 'view' && mode !== 'delete' && (
                           <Col>
                             <Button variant="danger" onClick={() => this.deletePermission(index)}>
                               Delete
@@ -477,7 +492,7 @@ class FormContainer extends React.Component {
                         )}
                       </Form.Group>
                     ))}
-                    {mode !== 'view' && (
+                    {mode !== 'view' && mode !== 'delete' && (
                       <Button variant="primary" onClick={this.addPermission}>Add Accessor</Button>
                     )}                  
                   </Card.Body>

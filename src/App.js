@@ -17,21 +17,19 @@ class App extends React.Component {
       data: [...components],
       showForm: false,
       selectedData: null,
-      mode: null // Mode available: create, edit, view
+      mode: null // Mode available: create, edit, view, delete
     }
   }
 
-  handleForm = (event, cb) => {
+  handleForm = (event) => {
     const { name } = event.target;
     this.setState({
       mode: name || null,
-      selectedData: null,
+      ...(!name && {selectedData: null})
     }, () => {
       this.setState(prevState => ({
         showForm: !prevState.showForm
-      }), () => {
-        if(cb !== undefined) setTimeout(() => {cb()});
-      })
+      }))
     })
   }
 
@@ -53,7 +51,6 @@ class App extends React.Component {
         selectedData: null
       })
     }
-    else throw new Error('Mode undefined!')
 
     this.setState({
       showForm: false
@@ -66,19 +63,17 @@ class App extends React.Component {
     })
   }
 
-  deleteData = () => {
+  deleteData = (e) => {
+    e.preventDefault();
     const { data, selectedData } = this.state;
-    const params = {target: {name: 'view'}}
-    const deleteConfirm = () => {
-      if(window.confirm('Are you sure to delete this data?')) {
-        this.setState({
-          data: [...data.filter(dt => dt.key !== selectedData.key)],
-          selectedData: null,
-          showForm: false,
-        })
-      }
+    if(window.confirm('Are you sure to delete this data?')) {
+      this.setState({
+        data: [...data.filter(dt => dt.key !== selectedData.key)],
+        selectedData: null,
+        showForm: false,
+        mode: null,
+      })
     }
-    this.handleForm(params, () => deleteConfirm())
   }
 
   render() {
@@ -126,8 +121,9 @@ class App extends React.Component {
                   variant="danger"
                   size="sm"
                   className="ml-1"
+                  name="delete"
                   disabled={!selectedData}
-                  onClick={this.deleteData}
+                  onClick={this.handleForm}
                 >
                   Delete
                 </Button>
@@ -150,6 +146,7 @@ class App extends React.Component {
           submitForm={this.submitForm}
           mode={mode}
           selectedData={selectedData}
+          deleteData={this.deleteData}
         />
       </Container>
     );
