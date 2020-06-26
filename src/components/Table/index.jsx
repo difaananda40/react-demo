@@ -30,13 +30,13 @@ class Table extends React.Component {
           cell.forEach((permit, index) => {
             const functions = permit.function.map(fn => fn).join(', ');
             data.push(
-              <div key={index}>
+              <div className="col col-auto" key={index}>
                 <p className="font-weight-bold m-0">{permit.permission}</p>
-                <p className="text-muted mb-1">{functions}</p>
+                <p className="text-muted m-0">{functions}</p>
               </div>
             )
           })
-          return data;
+          return <div className="row d-flex justify-content-start">{data}</div>;
         }
       }
     ];
