@@ -73,7 +73,8 @@ class App extends React.Component {
       if(window.confirm('Are you sure to delete this data?')) {
         this.setState({
           data: [...data.filter(dt => dt.key !== selectedData.key)],
-          selectedData: null
+          selectedData: null,
+          showForm: false,
         })
       }
     }
