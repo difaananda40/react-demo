@@ -25,18 +25,19 @@ class Table extends React.Component {
       {
         dataField: 'accessedby',
         text: 'Permission',
+        classes: 'text-nowrap',
         formatter: (cell) => {
           let data = [];
           cell.forEach((permit, index) => {
             const functions = permit.function.map(fn => fn).join(', ');
             data.push(
-              <div className="col col-auto" key={index}>
+              <div className="d-inline-block mr-4" key={index}>
                 <p className="font-weight-bold m-0">{permit.permission}</p>
                 <p className="text-muted m-0">{functions}</p>
               </div>
             )
           })
-          return <div className="row d-flex justify-content-start">{data}</div>;
+          return data;
         }
       }
     ];
