@@ -12,7 +12,8 @@ class Table extends React.Component {
       },
       {
         dataField: 'label',
-        text: 'Component Name'
+        text: 'Component Name',
+        classes: 'text-nowrap'
       },
       {
         dataField: 'parentKey',
