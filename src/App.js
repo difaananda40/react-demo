@@ -21,7 +21,7 @@ class App extends React.Component {
     }
   }
 
-  handleForm = (event) => {
+  handleForm = (event, cb) => {
     const { name } = event.target;
     this.setState({
       mode: name || null,
@@ -29,7 +29,9 @@ class App extends React.Component {
     }, () => {
       this.setState(prevState => ({
         showForm: !prevState.showForm
-      }))
+      }), () => {
+        if(cb !== undefined) setTimeout(() => {cb()});
+      })
     })
   }
 
@@ -66,12 +68,16 @@ class App extends React.Component {
 
   deleteData = () => {
     const { data, selectedData } = this.state;
-    if(window.confirm('Are you sure to delete this data?')) {
-      this.setState({
-        data: [...data.filter(dt => dt.key !== selectedData.key)],
-        selectedData: null
-      })
+    const params = {target: {name: 'view'}}
+    const deleteConfirm = () => {
+      if(window.confirm('Are you sure to delete this data?')) {
+        this.setState({
+          data: [...data.filter(dt => dt.key !== selectedData.key)],
+          selectedData: null
+        })
+      }
     }
+    this.handleForm(params, () => deleteConfirm())
   }
 
   render() {
