@@ -1,6 +1,8 @@
 import React from 'react';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import moment from 'moment';
+import { getOperation } from '../helper.js';
 
 class Table extends React.Component {
   constructor(props) {
@@ -22,6 +24,37 @@ class Table extends React.Component {
       {
         dataField: 'url',
         text: 'Url'
+      },
+      {
+        dataField: 'status',
+        text: 'Status'
+      },
+      {
+        dataField: 'recordDate',
+        text: 'Record Date',
+        headerAlign: 'center',
+        align: 'center',
+        formatter: cell => moment(cell, 'YYYYMMDD').format('DD/MM/YYYY')
+      },
+      {
+        dataField: 'recordTime',
+        text: 'Record Time',
+        headerAlign: 'center',
+        align: 'center',
+        formatter: cell => moment(cell, 'HHmmss').format('HH:mm:ss')
+      },
+      {
+        dataField: 'operation',
+        text: 'Operation',
+        headerAlign: 'center',
+        align: 'center',
+        formatter: cell => getOperation(cell)
+      },
+      {
+        dataField: 'recordCounter',
+        text: 'Record Counter',
+        headerAlign: 'center',
+        align: 'center'
       },
       {
         dataField: 'accessedby',

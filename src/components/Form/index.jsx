@@ -10,6 +10,8 @@ import {
 import accessorsData from '../Dummy/user-group.json';
 import modulesData from '../Dummy/modules.json';
 import moduleStatusData from '../Dummy/module-status.json'
+import moment from 'moment';
+import { getOperation } from '../helper.js';
 
 class FormContainer extends React.Component {
   constructor(props) {
@@ -23,6 +25,9 @@ class FormContainer extends React.Component {
         icon: '',
         url: '',
         status: '',
+        recordDate: null,
+        recordTime: null,
+        recordCounter: null,
       },
       isFormValidate: false,
       permissions: []
@@ -71,13 +76,16 @@ class FormContainer extends React.Component {
           icon: selectedData.icon,
           url: selectedData.url,
           status: selectedData.status,
+          recordDate: moment(selectedData.recordDate, 'YYYYMMDD'),
+          recordTime: moment(selectedData.recordTime, 'HHmmss'),
+          recordCounter: selectedData.recordCounter,
         },
         permissions: newPermissions,
         accessors: newAccessors,
       })
     }
 
-    if(selectedData && prevProps.selectedData !== selectedData && mode !== 'create') {
+    if(selectedData && prevProps.selectedData !== selectedData) {
       setForm();
     }
 
@@ -87,8 +95,13 @@ class FormContainer extends React.Component {
   }
 
   resetState = () => {
+    let currentAccessors = [...this.state.accessors];
+      currentAccessors.forEach(ca => {
+        ca.selected = false;
+      })
+    let newAccessors = [...currentAccessors];
     this.setState({
-      accessors: [...accessorsData.data],
+      accessors: [...newAccessors],
       info: {
         component_id: '',
         component_name: '',
@@ -96,6 +109,9 @@ class FormContainer extends React.Component {
         icon: '',
         url: '',
         status: '',
+        recordDate: moment(),
+        recordTime: moment(),
+        recordCounter: 1,
       },
       isFormValidate: false,
       permissions: []
@@ -202,6 +218,7 @@ class FormContainer extends React.Component {
     })
     if (form.checkValidity()) {
       const { info, permissions } = this.state;
+      const { mode } = this.props;
       let accessedBy = [];
       permissions.forEach(permit => {
         let newFunction = [];
@@ -223,11 +240,15 @@ class FormContainer extends React.Component {
         url: info.url,
         status: info.status,
         accessedby: accessedBy,
+        recordDate: moment().format('YYYYMMDD'),
+        recordTime: moment().format('HHmmss'),
+        recordCounter: mode === 'create' ? 1 : mode === 'edit' && parseInt(info.recordCounter) + 1,
+        operation: mode,
       }
       this.props.submitForm(data, this.props.mode)
       this.resetState();
     }
-  } 
+  }
 
   render() {
     const { show, handleForm, mode, deleteData } = this.props;
@@ -412,91 +433,198 @@ class FormContainer extends React.Component {
                     </Form.Group>
                   </Col>
                 </Row>
-                <Card>
-                  <Card.Header className="font-weight-bold text-white" style={{ backgroundColor: '#2196F3' }}>Component Permission</Card.Header>
-                  <Card.Body>
-                    {permissions.map((permit, index) => (
-                      <Form.Group key={index} as={Row}>
-                        <Col xs="2"><Form.Label>Accessor {index+1}*</Form.Label></Col>
-                        <Col xs="8">
-                          <Row>
-                            <Col xs="12" className="mb-2">
-                              <Form.Control
-                                as="select"
-                                value={permit.accessor}
-                                onChange={event => this.handleChangeAccessor(event, index)}
-                                required
-                                disabled={mode === 'view' || mode === 'delete'}
-                              >
-                                <option value=''>Choose...</option>
-                                {accessors.map(acc => (
-                                    <option disabled={acc.selected} key={acc.group_id} value={acc.group_id}>
-                                      {acc.group_name}
-                                    </option>
-                                  ))}
-                              </Form.Control>
-                              <Form.Control.Feedback type="invalid">
-                                Please select accessor!
-                              </Form.Control.Feedback>
+                <Row className="mb-3">
+                  <Col>
+                    <Card>
+                      <Card.Header className="font-weight-bold text-white" style={{ backgroundColor: '#2196F3' }}>Component Permission</Card.Header>
+                      <Card.Body>
+                        {permissions.map((permit, index) => (
+                          <Form.Group key={index} as={Row}>
+                            <Col xs="2"><Form.Label>Accessor {index+1}*</Form.Label></Col>
+                            <Col xs="8">
+                              <Row>
+                                <Col xs="12" className="mb-2">
+                                  <Form.Control
+                                    as="select"
+                                    value={permit.accessor}
+                                    onChange={event => this.handleChangeAccessor(event, index)}
+                                    required
+                                    disabled={mode === 'view' || mode === 'delete'}
+                                  >
+                                    <option value=''>Choose...</option>
+                                    {accessors.map(acc => (
+                                        <option disabled={acc.selected} key={acc.group_id} value={acc.group_id}>
+                                          {acc.group_name}
+                                        </option>
+                                      ))}
+                                  </Form.Control>
+                                  <Form.Control.Feedback type="invalid">
+                                    Please select accessor!
+                                  </Form.Control.Feedback>
+                                </Col>
+                                <Col xs="12">
+                                  <Form.Check
+                                    type="checkbox" inline label="create"
+                                    id={`check-create-${index}`}
+                                    name="create"
+                                    checked={permit.function.create}
+                                    disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
+                                    onChange={event => this.handleChangeFunction(event, index)}
+                                  />
+                                  <Form.Check
+                                    type="checkbox" inline label="view"
+                                    id={`check-view-${index}`}
+                                    name="view"
+                                    checked={permit.function.view}
+                                    disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
+                                    onChange={event => this.handleChangeFunction(event, index)}
+                                  />
+                                  <Form.Check
+                                    type="checkbox" inline label="edit"
+                                    id={`check-edit-${index}`}
+                                    name="edit"
+                                    checked={permit.function.edit}
+                                    disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
+                                    onChange={event => this.handleChangeFunction(event, index)}
+                                  />
+                                  <Form.Check
+                                    type="checkbox" inline label="delete"
+                                    id={`check-delete-${index}`}
+                                    name="delete"
+                                    checked={permit.function.delete}
+                                    disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
+                                    onChange={event => this.handleChangeFunction(event, index)}
+                                  />
+                                  <Form.Check
+                                    type="checkbox" inline label="restore"
+                                    id={`check-restore-${index}`}
+                                    name="restore"
+                                    checked={permit.function.restore}
+                                    disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
+                                    onChange={event => this.handleChangeFunction(event, index)}
+                                  />
+                                </Col>
+                              </Row>
                             </Col>
-                            <Col xs="12">
-                              <Form.Check
-                                type="checkbox" inline label="create"
-                                id={`check-create-${index}`}
-                                name="create"
-                                checked={permit.function.create}
-                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
-                                onChange={event => this.handleChangeFunction(event, index)}
-                              />
-                              <Form.Check
-                                type="checkbox" inline label="view"
-                                id={`check-view-${index}`}
-                                name="view"
-                                checked={permit.function.view}
-                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
-                                onChange={event => this.handleChangeFunction(event, index)}
-                              />
-                              <Form.Check
-                                type="checkbox" inline label="edit"
-                                id={`check-edit-${index}`}
-                                name="edit"
-                                checked={permit.function.edit}
-                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
-                                onChange={event => this.handleChangeFunction(event, index)}
-                              />
-                              <Form.Check
-                                type="checkbox" inline label="delete"
-                                id={`check-delete-${index}`}
-                                name="delete"
-                                checked={permit.function.delete}
-                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
-                                onChange={event => this.handleChangeFunction(event, index)}
-                              />
-                              <Form.Check
-                                type="checkbox" inline label="restore"
-                                id={`check-restore-${index}`}
-                                name="restore"
-                                checked={permit.function.restore}
-                                disabled={!permit.accessor || mode === 'view' || mode === 'delete'}
-                                onChange={event => this.handleChangeFunction(event, index)}
-                              />
-                            </Col>
-                          </Row>
-                        </Col>
+                            {mode !== 'view' && mode !== 'delete' && (
+                              <Col>
+                                <Button variant="danger" onClick={() => this.deletePermission(index)}>
+                                  Delete
+                                </Button>
+                              </Col>
+                            )}
+                          </Form.Group>
+                        ))}
                         {mode !== 'view' && mode !== 'delete' && (
+                          <Button variant="primary" onClick={this.addPermission}>Add Accessor</Button>
+                        )}                  
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Card>
+                      <Card.Header className="font-weight-bold text-white" style={{ backgroundColor: '#2196F3' }}>Audit Log Details</Card.Header>
+                      <Card.Body>
+                        <Row>
                           <Col>
-                            <Button variant="danger" onClick={() => this.deletePermission(index)}>
-                              Delete
-                            </Button>
+                            <Form.Group as={Row} controlId="record_date">
+                              <Form.Label column sm="4">
+                                Record Date
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="record_date"
+                                  value={info.recordDate?.format('DD/MM/YYYY')}
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
                           </Col>
-                        )}
-                      </Form.Group>
-                    ))}
-                    {mode !== 'view' && mode !== 'delete' && (
-                      <Button variant="primary" onClick={this.addPermission}>Add Accessor</Button>
-                    )}                  
-                  </Card.Body>
-                </Card>
+                          <Col>
+                            <Form.Group as={Row} controlId="record_time">
+                              <Form.Label column sm="4">
+                                Record Time
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="record_time"
+                                  value={info.recordTime?.format('HH:mm:ss')}
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col>
+                            <Form.Group as={Row} controlId="operator">
+                              <Form.Label column sm="4">
+                                Operator
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="operator"
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
+                          </Col>
+                          <Col>
+                            <Form.Group as={Row} controlId="operation">
+                              <Form.Label column sm="4">
+                                Function
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="operation"
+                                  value={getOperation(mode)}
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col>
+                            <Form.Group as={Row} controlId="workstation">
+                              <Form.Label column sm="4">
+                                Workstation
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="workstation"
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
+                          </Col>
+                          <Col>
+                            <Form.Group as={Row} controlId="record_counter">
+                              <Form.Label column sm="4">
+                                No Counter
+                              </Form.Label>
+                              <Col sm="8">
+                                <Form.Control
+                                  type="text"
+                                  name="record_counter"
+                                  value={info.recordCounter}
+                                  disabled
+                                />
+                              </Col>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
               </Card.Body>
             </Card>
           </Modal.Body>
