@@ -39,7 +39,8 @@ class App extends React.Component {
         data: [
           data,
           ...prev.data
-        ]
+        ],
+        selectedData: null
       }))
     }
     else if(mode === 'edit') {
